@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ЯМайстер — ремонт і реставрація взуття та шкіри на Подолі</title>
+  <meta name="description" content="Ремонт взуття, сумок і шкіряних виробів у Києві. Реставрація, фарбування, заміна підошви та фурнітури. Майстерня ЯМайстер, вул. Спаська, 9а.">
+  <meta name="theme-color" content="#171310">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23171310'/%3E%3Cpath d='M13 41h19c8 0 12-5 13-15l6 2c-2 14-9 21-21 21H13z' fill='%23f3c54c'/%3E%3Cpath d='M20 16h13v25H20z' fill='%23f3eee4'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --ink: #171310;
+      --bone: #f3eee4;
+      --bone-deep: #e2d8c8;
+      --paper: #fffaf0;
+      --red: #a63d31;
+      --signal: #f3c54c;
+      --muted: #6d645b;
+      --line: rgba(23, 19, 16, .19);
+      --white-line: rgba(255,255,255,.18);
+      --sans: Arial, Helvetica, sans-serif;
+      --serif: Georgia, 'Times New Roman', serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--ink);
+      background: var(--bone);
+      font-family: var(--sans);
+      font-size: 17px;
+      line-height: 1.55;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+      pointer-events: none;
+      opacity: .13;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+    }
+    body.menu-open { overflow: hidden; }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; }
+    button, input, select, textarea { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    .skip-link { position: fixed; left: 14px; top: -80px; z-index: 120; padding: 12px 16px; background: white; }
+    .skip-link:focus { top: 14px; }
+    .wrap { width: min(1240px, calc(100% - 48px)); margin-inline: auto; }
+    .section { padding: 112px 0; }
+    .dark { color: var(--bone); background: var(--ink); }
+    .red { color: var(--paper); background: var(--red); }
+    .kicker { margin: 0 0 16px; color: var(--red); font-size: .75rem; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+    .dark .kicker, .red .kicker { color: var(--signal); }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2 { font-family: var(--serif); font-weight: 700; line-height: .98; }
+    h1 { max-width: 900px; margin-bottom: 26px; font-size: clamp(3.6rem, 8.7vw, 8.4rem); letter-spacing: -.075em; }
+    h2 { max-width: 880px; margin-bottom: 22px; font-size: clamp(2.6rem, 5.4vw, 5.8rem); letter-spacing: -.055em; }
+    h3 { margin-bottom: 10px; line-height: 1.08; }
+    .lead { max-width: 650px; color: var(--muted); font-size: 1.14rem; }
+    .dark .lead, .red .lead { color: rgba(255,255,255,.68); }
+
+    .page-intro {
+      position: fixed;
+      inset: 0;
+      z-index: 110;
+      display: grid;
+      place-items: center;
+      background: var(--ink);
+      color: var(--bone);
+      transition: clip-path .85s cubic-bezier(.77,0,.18,1);
+      clip-path: inset(0 0 0 0);
+    }
+    .page-intro.done { clip-path: inset(0 0 100% 0); pointer-events: none; }
+    .intro-logo { display: flex; align-items: center; gap: 15px; font-size: clamp(1.6rem,4vw,3.2rem); font-weight: 900; }
+    .intro-line { width: 0; height: 3px; margin-top: 18px; background: var(--signal); animation: loadline 1s ease forwards; }
+    @keyframes loadline { to { width: 100%; } }
+    .progress { position: fixed; left: 0; top: 0; z-index: 101; width: 0; height: 3px; background: var(--signal); }
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 105;
+      max-width: 360px;
+      padding: 14px 18px;
+      color: white;
+      background: var(--ink);
+      border: 1px solid rgba(255,255,255,.2);
+      transform: translateY(120%);
+      transition: transform .35s ease;
+    }
+    .toast.show { transform: translateY(0); }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 80;
+      background: rgba(243,238,228,.94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+    }
+    .nav { min-height: 72px; display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 22px; }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 900; text-decoration: none; }
+    .brand-mark { width: 39px; height: 39px; display: grid; place-items: center; color: var(--bone); background: var(--ink); border-radius: 50%; font-family: var(--serif); font-size: 1.25rem; }
+    .nav-links { display: flex; justify-content: center; gap: 14px; }
+    .nav-links a { position: relative; white-space: nowrap; font-size: .7rem; font-weight: 900; text-decoration: none; }
+    .nav-links a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -7px; height: 2px; background: var(--red); transition: right .25s ease; }
+    .nav-links a:hover::after, .nav-links a.active::after { right: 0; }
+    .menu-button { display: none; padding: 8px 0; border: 0; background: transparent; font-weight: 900; }
+
+    .btn {
+      display: inline-flex;
+      min-height: 50px;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 20px;
+      border: 1px solid var(--ink);
+      color: white;
+      background: var(--ink);
+      font-size: .9rem;
+      font-weight: 900;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform .22s ease, box-shadow .22s ease, background .22s ease;
+    }
+    .btn:hover { transform: translate(-3px,-3px); box-shadow: 5px 5px 0 var(--signal); }
+    .btn-signal { color: var(--ink); border-color: var(--signal); background: var(--signal); }
+    .btn-outline { color: var(--ink); background: transparent; }
+    .btn-paper { color: var(--ink); border-color: var(--paper); background: var(--paper); }
+    .btn-arrow::after { content: "↗"; font-size: 1.2em; }
+
+    .hero { padding: 64px 0 82px; border-bottom: 1px solid var(--line); }
+    .hero-top { display: flex; align-items: center; justify-content: space-between; gap: 30px; margin-bottom: 32px; }
+    .hero-place { display: flex; align-items: center; gap: 10px; font-size: .84rem; font-weight: 800; }
+    .hero-place::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--red); }
+    .hero-index { color: var(--muted); font-family: monospace; font-size: .78rem; }
+    .hero-title .outline { color: transparent; -webkit-text-stroke: 1.5px var(--ink); }
+    .hero-bottom { display: grid; grid-template-columns: .84fr 1.16fr; gap: 50px; align-items: end; }
+    .hero-copy { padding-bottom: 22px; }
+    .hero-copy .lead { margin-bottom: 30px; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .repair-ticket {
+      position: relative;
+      display: grid;
+      grid-template-columns: .8fr 1.2fr;
+      min-height: 410px;
+      overflow: hidden;
+      color: var(--paper);
+      background: var(--red);
+      box-shadow: 16px 16px 0 var(--ink);
+      transform: rotate(1.2deg);
+    }
+    .ticket-copy { display: flex; flex-direction: column; justify-content: space-between; padding: 32px; border-right: 2px dashed rgba(255,255,255,.38); }
+    .ticket-no { font-family: monospace; font-size: .75rem; letter-spacing: .12em; }
+    .ticket-main strong { display: block; margin-bottom: 4px; font-family: var(--serif); font-size: 3.4rem; line-height: .9; }
+    .ticket-main span { font-size: .85rem; }
+    .ticket-meta { display: grid; gap: 8px; font-size: .82rem; }
+    .ticket-image { position: relative; overflow: hidden; }
+    .ticket-image img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.9) contrast(1.05); transform: scale(1.04); }
+    .ticket-seal { position: absolute; right: 18px; top: 18px; width: 88px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; color: var(--ink); background: var(--signal); font-size: .66rem; font-weight: 900; line-height: 1.15; text-align: center; text-transform: uppercase; transform: rotate(8deg); }
+
+    .ticker { overflow: hidden; color: var(--bone); background: var(--ink); border-bottom: 1px solid var(--white-line); }
+    .ticker-track { width: max-content; display: flex; gap: 28px; padding: 14px 0; animation: ticker 26s linear infinite; }
+    .ticker-track span { display: flex; align-items: center; gap: 28px; font-family: var(--serif); font-size: 1.12rem; white-space: nowrap; }
+    .ticker-track span::after { content: "✦"; color: var(--signal); }
+    @keyframes ticker { to { transform: translateX(-50%); } }
+
+    .split-head { display: grid; grid-template-columns: 1.1fr .9fr; gap: 60px; align-items: end; margin-bottom: 58px; }
+    .split-head h2 { margin-bottom: 0; }
+    .section-label { display: block; margin-bottom: 16px; color: var(--red); font-size: .76rem; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
+    .dark .section-label, .red .section-label { color: var(--signal); }
+
+    .service-ledger { border-top: 1px solid var(--white-line); }
+    .service-row {
+      position: relative;
+      display: grid;
+      grid-template-columns: 70px 1.1fr .9fr auto;
+      gap: 24px;
+      align-items: center;
+      min-height: 118px;
+      padding: 22px 0;
+      border-bottom: 1px solid var(--white-line);
+      color: inherit;
+      text-decoration: none;
+      transition: padding .25s ease, background .25s ease;
+    }
+    .service-row:hover { padding-inline: 18px; background: rgba(255,255,255,.055); }
+    .service-row .num { color: var(--signal); font-family: var(--serif); font-size: 1.4rem; }
+    .service-row h3 { margin: 0; font-family: var(--serif); font-size: clamp(1.45rem,2.4vw,2.6rem); font-weight: 500; }
+    .service-row p { margin: 0; color: rgba(255,255,255,.62); font-size: .93rem; }
+    .service-row .plus { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--white-line); border-radius: 50%; transition: transform .3s ease, color .3s ease; }
+    .service-row:hover .plus { color: var(--ink); background: var(--signal); transform: translateX(4px); }
+
+    .estimator-layout { display: grid; grid-template-columns: .78fr 1.22fr; gap: 70px; align-items: start; }
+    .sticky-copy { position: sticky; top: 110px; }
+    .estimator {
+      padding: 34px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: 10px 10px 0 var(--red);
+    }
+    .estimator h3 { font-family: var(--serif); font-size: 2rem; }
+    .field { margin-top: 26px; }
+    .field-label { display: block; margin-bottom: 10px; font-size: .77rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { padding: 10px 14px; border: 1px solid var(--line); background: transparent; cursor: pointer; transition: background .2s,color .2s,border .2s; }
+    .chip.active { color: white; border-color: var(--red); background: var(--red); }
+    .estimate-result { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: end; margin-top: 30px; padding-top: 28px; border-top: 2px dashed var(--line); }
+    .estimate-result small { display: block; color: var(--muted); }
+    .estimate-price { font-family: var(--serif); font-size: clamp(2rem,4vw,4rem); line-height: 1; }
+    .demo-tag { display: inline-block; margin-top: 10px; padding: 4px 7px; color: var(--ink); background: var(--signal); font-size: .67rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+
+    .works-wall { display: grid; grid-template-columns: repeat(12,1fr); grid-auto-rows: 54px; gap: 18px; }
+    .work { position: relative; overflow: hidden; background: #d6cab9; }
+    .work img { width: 100%; height: 100%; object-fit: cover; transition: transform .65s cubic-bezier(.2,.7,.2,1), filter .4s ease; }
+    .work:hover img { transform: scale(1.06) rotate(.4deg); filter: saturate(1.08); }
+    .work figcaption { position: absolute; left: 13px; bottom: 13px; padding: 8px 10px; color: var(--ink); background: var(--paper); font-size: .76rem; font-weight: 900; }
+    .work-1 { grid-column: 1/6; grid-row: span 8; transform: rotate(-1deg); }
+    .work-2 { grid-column: 7/10; grid-row: 2/span 6; transform: rotate(1.4deg); }
+    .work-3 { grid-column: 10/13; grid-row: 1/span 8; transform: rotate(-1deg); }
+    .work-4 { grid-column: 2/7; grid-row: span 6; transform: rotate(.7deg); }
+    .work-5 { grid-column: 8/13; grid-row: span 6; transform: rotate(-.8deg); }
+    .works-note { display: flex; justify-content: space-between; gap: 24px; margin-top: 28px; color: var(--muted); font-size: .83rem; }
+
+    .price-table { border-top: 2px solid var(--ink); }
+    .price-row { display: grid; grid-template-columns: 90px 1fr 180px; gap: 20px; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--line); }
+    .price-row:hover { color: var(--red); }
+    .price-row .code { font-family: monospace; color: var(--muted); }
+    .price-row strong { font-family: var(--serif); font-size: 1.35rem; font-weight: 500; }
+    .price-row .amount { text-align: right; font-weight: 900; }
+    .price-note { max-width: 700px; margin-top: 22px; color: var(--muted); font-size: .86rem; }
+
+    .about-layout { display: grid; grid-template-columns: 1.05fr .95fr; gap: 70px; }
+    .about-photo { position: relative; min-height: 610px; overflow: hidden; }
+    .about-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .about-photo::after { content: "ПОДІЛ · СПАСЬКА 9А"; position: absolute; left: -35px; bottom: 65px; padding: 10px 16px; color: var(--ink); background: var(--signal); font-weight: 900; letter-spacing: .12em; transform: rotate(-90deg); }
+    .about-copy { display: flex; flex-direction: column; justify-content: space-between; }
+    .about-copy h2 { margin-top: 0; }
+    .about-text { max-width: 600px; color: rgba(255,255,255,.68); font-size: 1.05rem; }
+    .facts { display: grid; grid-template-columns: 1fr 1fr; margin-top: 42px; border-top: 1px solid var(--white-line); border-left: 1px solid var(--white-line); }
+    .fact { min-height: 150px; padding: 20px; border-right: 1px solid var(--white-line); border-bottom: 1px solid var(--white-line); }
+    .fact strong { display: block; margin-bottom: 8px; color: var(--signal); font-family: var(--serif); font-size: 2rem; }
+    .fact span { color: rgba(255,255,255,.67); font-size: .86rem; }
+
+    .process { counter-reset: steps; }
+    .process-step { display: grid; grid-template-columns: 90px 1fr 1fr; gap: 34px; padding: 30px 0; border-top: 1px solid rgba(255,255,255,.28); }
+    .process-step:last-child { border-bottom: 1px solid rgba(255,255,255,.28); }
+    .process-step::before { counter-increment: steps; content: "0" counter(steps); color: var(--signal); font-family: var(--serif); font-size: 1.7rem; }
+    .process-step h3 { font-family: var(--serif); font-size: 1.8rem; font-weight: 500; }
+    .process-step p { color: rgba(255,255,255,.68); }
+
+    .benefits { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+    .benefit { min-height: 240px; padding: 28px; background: var(--bone); }
+    .benefit .icon { display: block; margin-bottom: 58px; color: var(--red); font-family: var(--serif); font-size: 2rem; }
+    .benefit p { color: var(--muted); font-size: .92rem; }
+
+    .reviews-layout { display: grid; grid-template-columns: .66fr 1.34fr; gap: 70px; }
+    .score { position: sticky; top: 110px; align-self: start; }
+    .score-number { font-family: var(--serif); font-size: clamp(6rem,12vw,11rem); line-height: .8; }
+    .score-stars { margin-top: 22px; color: var(--signal); letter-spacing: .14em; }
+    .review-list { min-width: 0; }
+    .review-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+    .review-toolbar p { max-width: 430px; color: rgba(255,255,255,.58); font-size: .88rem; }
+    .review-nav { display: flex; gap: 8px; }
+    .review-arrow { width: 48px; height: 48px; display: grid; place-items: center; color: var(--paper); border: 1px solid rgba(255,255,255,.28); border-radius: 50%; background: transparent; font-size: 1.35rem; cursor: pointer; transition: color .2s ease, background .2s ease, opacity .2s ease, transform .2s ease; }
+    .review-arrow:hover { color: var(--ink); background: var(--signal); transform: translateY(-2px); }
+    .review-arrow:disabled { opacity: .28; cursor: default; transform: none; }
+    .review-track { display: flex; gap: 18px; overflow-x: auto; padding: 2px 2px 18px; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; overscroll-behavior-inline: contain; touch-action: pan-x; cursor: grab; }
+    .review-track::-webkit-scrollbar { display: none; }
+    .review-track.dragging { cursor: grabbing; scroll-behavior: auto; user-select: none; }
+    .review { position: relative; flex: 0 0 calc(50% - 9px); min-height: 310px; display: flex; flex-direction: column; justify-content: space-between; padding: 28px; overflow: hidden; opacity: .48; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.055); transform: translateY(18px) scale(.965); scroll-snap-align: start; transition: opacity .5s ease, transform .55s cubic-bezier(.2,.75,.2,1), border-color .5s ease, background .5s ease; }
+    .review.is-visible { opacity: 1; border-color: rgba(243,197,76,.62); background: rgba(255,255,255,.085); transform: none; }
+    .review::after { content: "“"; position: absolute; right: 16px; top: -28px; color: rgba(243,197,76,.16); font-family: var(--serif); font-size: 9rem; line-height: 1; pointer-events: none; }
+    .review-avatar { width: 58px; height: 58px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.28); border-radius: 50%; color: var(--ink); background: var(--signal); font-family: var(--serif); font-size: 1.35rem; font-weight: 700; }
+    .review-body { position: relative; z-index: 1; min-width: 0; margin-top: 38px; }
+    .review p { font-family: var(--serif); font-size: clamp(1.25rem,1.7vw,1.7rem); line-height: 1.35; }
+    .review footer { color: rgba(255,255,255,.56); font-size: .82rem; }
+
+    .faq-layout { display: grid; grid-template-columns: .72fr 1.28fr; gap: 70px; }
+    .faq-list { border-top: 1px solid var(--line); }
+    details { border-bottom: 1px solid var(--line); }
+    summary { position: relative; padding: 24px 54px 24px 0; font-family: var(--serif); font-size: 1.35rem; cursor: pointer; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; position: absolute; right: 4px; top: 17px; font-family: var(--sans); font-size: 1.8rem; transition: transform .25s ease; }
+    details[open] summary::after { transform: rotate(45deg); }
+    details p { max-width: 700px; padding: 0 52px 24px 0; color: var(--muted); }
+
+    .photo-form-layout { display: grid; grid-template-columns: .9fr 1.1fr; gap: 54px; align-items: center; }
+    .upload-box { padding: 28px; border: 2px dashed rgba(255,255,255,.45); background: rgba(0,0,0,.08); }
+    .upload-zone { min-height: 220px; display: grid; place-items: center; padding: 24px; border: 1px solid rgba(255,255,255,.28); text-align: center; cursor: pointer; }
+    .upload-zone.dragging { background: rgba(255,255,255,.08); }
+    .upload-zone input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .preview { display: none; max-height: 260px; margin: 0 auto 18px; object-fit: contain; }
+    .preview.visible { display: block; }
+    .upload-title { display: block; margin-bottom: 6px; font-family: var(--serif); font-size: 1.5rem; }
+    .upload-note { color: rgba(255,255,255,.65); font-size: .85rem; }
+    .upload-disclaimer { display: flex; gap: 9px; align-items: flex-start; margin-top: 14px; padding: 12px 14px; color: rgba(255,255,255,.76); border: 1px solid rgba(255,255,255,.22); font-size: .82rem; line-height: 1.45; }
+    .upload-disclaimer strong { color: white; }
+    .damage-input { width: 100%; min-height: 100px; margin-top: 14px; padding: 14px; color: white; border: 1px solid rgba(255,255,255,.3); background: transparent; resize: vertical; }
+    .damage-input::placeholder { color: rgba(255,255,255,.5); }
+    .upload-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+
+    .contact-grid { display: grid; grid-template-columns: .9fr 1.1fr; min-height: 610px; }
+    .contact-panel { display: flex; flex-direction: column; justify-content: space-between; padding: 48px; color: var(--paper); background: var(--ink); }
+    .contact-panel h2 { font-size: clamp(2.5rem,5vw,5rem); }
+    .contact-lines { display: grid; gap: 14px; margin: 40px 0; }
+    .contact-line { display: grid; grid-template-columns: 100px 1fr; gap: 22px; padding-top: 14px; border-top: 1px solid var(--white-line); }
+    .contact-line span { color: rgba(255,255,255,.55); font-size: .72rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .contact-line a { font-weight: 900; text-decoration: none; }
+    .map { min-height: 610px; background: #d7d1c7; }
+    .map iframe { width: 100%; height: 100%; min-height: 610px; border: 0; filter: grayscale(.55) contrast(1.1); }
+
+    .footer { padding: 26px 0 92px; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 28px; padding-top: 22px; border-top: 1px solid var(--line); color: var(--muted); font-size: .82rem; }
+    .mobile-dock { display: none; }
+
+    .reveal { opacity: 0; transform: translateY(34px); transition: opacity .75s ease, transform .75s cubic-bezier(.2,.7,.2,1); }
+    .reveal.in { opacity: 1; transform: none; }
+    .mask-reveal { clip-path: none; }
+    .mask-reveal img { opacity: 1; transform: none; }
+    .mask-reveal.in img { animation: image-arrive .8s cubic-bezier(.2,.7,.2,1) both; }
+    @keyframes image-arrive { from { opacity: .65; transform: translateY(22px) scale(1.025); } to { opacity: 1; transform: none; } }
+
+    @media (max-width: 980px) {
+      .nav { grid-template-columns: auto 1fr auto; }
+      .nav-links { display: none; }
+      .menu-button { display: block; justify-self: end; }
+      .nav > .btn { display: none; }
+      .nav-links.open { position: fixed; inset: 72px 0 0; display: flex; flex-direction: column; justify-content: flex-start; gap: 0; padding: 34px 24px; background: var(--bone); }
+      .nav-links.open a { padding: 16px 0; border-bottom: 1px solid var(--line); font-family: var(--serif); font-size: 1.8rem; }
+      .hero-bottom, .split-head, .estimator-layout, .about-layout, .reviews-layout, .faq-layout, .photo-form-layout { grid-template-columns: 1fr; }
+      .sticky-copy, .score { position: static; }
+      .service-row { grid-template-columns: 54px 1fr auto; }
+      .service-row p { grid-column: 2/3; }
+      .benefits { grid-template-columns: repeat(2,1fr); }
+      .contact-grid { grid-template-columns: 1fr; }
+      .map, .map iframe { min-height: 460px; }
+    }
+
+    @media (max-width: 720px) {
+      body { font-size: 16px; }
+      .wrap { width: min(100% - 28px,1240px); }
+      .section { padding: 78px 0; }
+      .hero { padding: 38px 0 58px; }
+      .hero-top { margin-bottom: 22px; }
+      h1 { font-size: clamp(3.25rem,17vw,5.25rem); }
+      h2 { font-size: clamp(2.5rem,13vw,4rem); }
+      .hero-bottom { gap: 34px; }
+      .repair-ticket { grid-template-columns: 1fr; min-height: 520px; transform: none; box-shadow: 8px 8px 0 var(--ink); }
+      .ticket-copy { min-height: 250px; border-right: 0; border-bottom: 2px dashed rgba(255,255,255,.38); }
+      .service-row { grid-template-columns: 42px 1fr auto; gap: 10px; min-height: 145px; }
+      .service-row p { grid-column: 2/4; }
+      .review { grid-template-columns: 46px 1fr; gap: 14px; }
+      .review-avatar { width: 46px; height: 46px; font-size: 1.05rem; }
+      .review { flex-basis: 86%; min-height: 290px; padding: 22px; }
+      .review-toolbar { align-items: flex-end; }
+      .review-toolbar p { max-width: 230px; }
+      .estimator { padding: 24px 18px; box-shadow: 6px 6px 0 var(--red); }
+      .estimate-result { grid-template-columns: 1fr; }
+      .works-wall { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 230px; }
+      .work-1,.work-2,.work-3,.work-4,.work-5 { grid-column: auto; grid-row: auto; transform: none; }
+      .work-1 { grid-column: 1/3; }
+      .works-note { flex-direction: column; }
+      .price-row { grid-template-columns: 56px 1fr; }
+      .price-row .amount { grid-column: 2/3; text-align: left; }
+      .about-photo { min-height: 440px; }
+      .process-step { grid-template-columns: 54px 1fr; gap: 12px; }
+      .process-step p { grid-column: 2/3; }
+      .benefits { grid-template-columns: 1fr; }
+      .benefit { min-height: 190px; }
+      .benefit .icon { margin-bottom: 34px; }
+      .facts { grid-template-columns: 1fr 1fr; }
+      .photo-form-layout { gap: 36px; }
+      .contact-panel { padding: 34px 22px; }
+      .contact-line { grid-template-columns: 1fr; gap: 4px; }
+      .footer { padding-bottom: 104px; }
+      .footer-inner { flex-direction: column; gap: 8px; }
+      .mobile-dock { position: fixed; left: 10px; right: 10px; bottom: 10px; z-index: 90; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; background: rgba(23,19,16,.94); backdrop-filter: blur(12px); }
+      .mobile-dock .btn { min-height: 46px; padding: 9px; }
+      .toast { left: 10px; right: 10px; bottom: 78px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      .page-intro { display: none; }
+      .reveal { opacity: 1; transform: none; }
+      .mask-reveal { clip-path: none; }
+      .review-track { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">До основного вмісту</a>
+  <div class="page-intro" aria-hidden="true"><div><div class="intro-logo"><span class="brand-mark">Я</span> ЯМайстер</div><div class="intro-line"></div></div></div>
+  <div class="progress" aria-hidden="true"></div>
+  <div class="toast" role="status" aria-live="polite"></div>
+
+  <header class="topbar">
+    <nav class="nav wrap" aria-label="Головна навігація">
+      <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">Я</span><span>ЯМайстер</span></a>
+      <div class="nav-links" id="nav-links">
+        <a href="#services">Послуги</a>
+        <a href="#estimator">Оцінка</a>
+        <a href="#works">Роботи</a>
+        <a href="#prices">Ціни</a>
+        <a href="#about">Про нас</a>
+        <a href="#process">Етапи</a>
+        <a href="#approach">Підхід</a>
+        <a href="#reviews">Відгуки</a>
+        <a href="#faq">FAQ</a>
+        <a href="#photo-estimate">Фото-оцінка</a>
+        <a href="#contacts">Контакти</a>
+      </div>
+      <button class="menu-button" type="button" aria-expanded="false" aria-controls="nav-links">Меню</button>
+      <a class="btn call-link" data-call href="tel:+380673459480">Подзвонити</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="wrap">
+        <div class="hero-top reveal"><span class="hero-place">Київ · Поділ · Спаська 9а</span><span class="hero-index">EST. / 20+ РОКІВ РЕМЕСЛА</span></div>
+        <div class="hero-title reveal">
+          <p class="kicker">Ремонт · реставрація · догляд</p>
+          <h1>Не викидайте.<br><span class="outline">Відновлюйте.</span></h1>
+        </div>
+        <div class="hero-bottom">
+          <div class="hero-copy reveal">
+            <p class="lead">Повертаємо форму, колір і характер взуттю, сумкам та речам зі шкіри. Спочатку оглядаємо, потім чесно кажемо, що варто ремонтувати.</p>
+            <div class="hero-actions">
+              <a class="btn btn-signal call-link" data-call href="tel:+380673459480">Обговорити ремонт</a>
+              <a class="btn btn-outline" href="#estimator">Попередня оцінка</a>
+            </div>
+          </div>
+          <article class="repair-ticket reveal" aria-label="Квитанція майстерні">
+            <div class="ticket-copy">
+              <span class="ticket-no">КВИТАНЦІЯ № 04070</span>
+              <div class="ticket-main"><strong>4,4</strong><span>оцінка майстерні на Top20</span></div>
+              <div class="ticket-meta"><span>52 відгуки</span><span>Пн–Пт 09:00–18:00</span><span>Сб 10:00–18:00</span></div>
+            </div>
+            <div class="ticket-image"><img src="assets/real-loafers-before-after.webp" alt="Лофери до та після відновлення у майстерні ЯМайстер" width="805" height="808"><span class="ticket-seal">Друге<br>життя<br>речей</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <div class="ticker" aria-hidden="true"><div class="ticker-track">
+      <span>ремонт підошви</span><span>фарбування шкіри</span><span>реставрація сумок</span><span>заміна фурнітури</span><span>ремонт блискавок</span><span>відновлення кольору</span>
+      <span>ремонт підошви</span><span>фарбування шкіри</span><span>реставрація сумок</span><span>заміна фурнітури</span><span>ремонт блискавок</span><span>відновлення кольору</span>
+    </div></div>
+
+    <section class="section dark" id="services">
+      <div class="wrap">
+        <div class="split-head reveal">
+          <div><span class="section-label">Послуги майстерні</span><h2>Працюємо і з буденними, і зі складними випадками</h2></div>
+          <p class="lead">Кожен виріб спочатку оглядає майстер. Обсяг робіт, матеріали, строк і фінальну вартість погоджуємо до початку ремонту.</p>
+        </div>
+        <div class="service-ledger">
+          <a class="service-row reveal" href="services/remont-vzuttya.html"><span class="num">01</span><h3>Ремонт взуття</h3><p>Підошви, підбори, набійки, шви, супінатори та локальні пошкодження.</p><span class="plus" aria-hidden="true">→</span></a>
+          <a class="service-row reveal" href="services/restavraciya-shkiry.html"><span class="num">02</span><h3>Реставрація шкіри</h3><p>Відновлення поверхні, текстури, кольору та захисного шару.</p><span class="plus" aria-hidden="true">→</span></a>
+          <a class="service-row reveal" href="services/remont-sumok.html"><span class="num">03</span><h3>Сумки та шкіргалантерея</h3><p>Ручки, кути, карабіни, блискавки, замки та декоративні елементи.</p><span class="plus" aria-hidden="true">→</span></a>
+          <a class="service-row reveal" href="services/farbuvannya.html"><span class="num">04</span><h3>Фарбування виробів</h3><p>Оновлення або зміна кольору взуття, сумок та шкіряного одягу.</p><span class="plus" aria-hidden="true">→</span></a>
+          <a class="service-row reveal" href="services/remont-blyskavok.html"><span class="num">05</span><h3>Ремонт блискавок</h3><p>Заміна бігунка, частковий ремонт або повна заміна блискавки.</p><span class="plus" aria-hidden="true">→</span></a>
+          <a class="service-row reveal" href="services/doglyad.html"><span class="num">06</span><h3>Профілактика й догляд</h3><p>Захист підошви, професійне очищення та рекомендації з догляду.</p><span class="plus" aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="estimator">
+      <div class="wrap estimator-layout">
+        <div class="sticky-copy reveal">
+          <span class="section-label">Попередня оцінка</span>
+          <p class="kicker">Спробуйте самі</p>
+          <h2>Чернетка вартості за 20 секунд</h2>
+          <p class="lead">Оберіть тип речі й проблему. Розрахунок дає лише попередній орієнтир: точну ціну майстер називає після огляду.</p>
+        </div>
+        <div class="estimator reveal" data-estimator>
+          <h3>Що потрібно відновити?</h3>
+          <div class="field"><span class="field-label">1. Тип виробу</span><div class="chips" data-group="item"><button class="chip active" type="button" data-value="shoes">Взуття</button><button class="chip" type="button" data-value="bag">Сумка</button><button class="chip" type="button" data-value="clothes">Шкіряний одяг</button></div></div>
+          <div class="field"><span class="field-label">2. Основна проблема</span><div class="chips" data-group="work"><button class="chip active" type="button" data-value="color">Колір / потертості</button><button class="chip" type="button" data-value="sole">Підошва</button><button class="chip" type="button" data-value="zip">Блискавка</button><button class="chip" type="button" data-value="hardware">Фурнітура</button></div></div>
+          <div class="estimate-result"><div><small>Попередній діапазон</small><div class="estimate-price" id="estimate-price">від 650 грн</div><span class="demo-tag">попередній орієнтир</span></div><a class="btn" href="#photo-estimate">Оцінити по фото</a></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="works">
+      <div class="wrap">
+        <div class="split-head reveal"><div><span class="section-label">Приклади робіт</span><h2>Не «як нове». Як ваше — тільки знову доглянуте</h2></div><p class="lead">У галереї — приклади ремонту взуття, відновлення сумок і професійної роботи зі шкірою.</p></div>
+        <div class="works-wall">
+          <figure class="work work-1 mask-reveal"><img src="assets/real-loafers-before-after.webp" alt="Лофери до та після реставрації в ЯМайстер" width="805" height="808" loading="lazy"><figcaption>Лофери · до / після</figcaption></figure>
+          <figure class="work work-2 mask-reveal"><img src="assets/real-bag-restoration.webp" alt="Шкіряна сумка після реставрації в ЯМайстер" width="658" height="759" loading="lazy"><figcaption>Сумка · реставрація</figcaption></figure>
+          <figure class="work work-3 mask-reveal"><img src="assets/real-sneakers.webp" alt="Кросівки після відновлення в ЯМайстер" width="750" height="936" loading="lazy"><figcaption>Кросівки · готовий результат</figcaption></figure>
+          <figure class="work work-4 mask-reveal"><img src="assets/real-boots-recolor.webp" alt="Черевики до та після зміни кольору в ЯМайстер" width="872" height="764" loading="lazy"><figcaption>Черевики · зміна кольору</figcaption></figure>
+          <figure class="work work-5 mask-reveal"><img src="assets/real-leather-shoes.webp" alt="Класичні туфлі після відновлення шкіри в ЯМайстер" width="685" height="570" loading="lazy"><figcaption>Туфлі · відновлення шкіри</figcaption></figure>
+        </div>
+        <div class="works-note"><span>Роботи майстерні з відкритих бізнес-сторінок.</span><span><a href="https://www.instagram.com/ya_master_kiev/" target="_blank" rel="noopener noreferrer">Instagram ↗</a> · <a href="https://top20.ua/kyiv/dom-i-byit/remont-obuvi/yamayster-restavratsiya-i-farbuvannya-shkirvirobiv.html" target="_blank" rel="noopener noreferrer">більше робіт ↗</a></span></div>
+      </div>
+    </section>
+
+    <section class="section" id="prices">
+      <div class="wrap">
+        <div class="split-head reveal"><div><span class="section-label">Орієнтовні ціни</span><h2>Орієнтири до огляду</h2></div><p class="lead">Ціни залежать від матеріалу, стану речі та складності роботи. Точну суму майстер назве після огляду.</p></div>
+        <div class="price-table reveal">
+          <div class="price-row"><span class="code">P-01</span><strong>Заміна набійок</strong><span class="amount">від 350 грн</span></div>
+          <div class="price-row"><span class="code">P-02</span><strong>Профілактика підошви</strong><span class="amount">від 550 грн</span></div>
+          <div class="price-row"><span class="code">P-03</span><strong>Заміна блискавки</strong><span class="amount">від 700 грн</span></div>
+          <div class="price-row"><span class="code">P-04</span><strong>Локальне фарбування</strong><span class="amount">від 650 грн</span></div>
+          <div class="price-row"><span class="code">P-05</span><strong>Повна реставрація взуття</strong><span class="amount">від 1 200 грн</span></div>
+          <div class="price-row"><span class="code">P-06</span><strong>Ремонт фурнітури сумки</strong><span class="amount">від 450 грн</span></div>
+          <div class="price-row"><span class="code">P-07</span><strong>Реставрація сумки</strong><span class="amount">від 1 400 грн</span></div>
+        </div>
+        <p class="price-note"><strong>Важливо:</strong> ціни вище є попередніми орієнтирами. Фінальна вартість залежить від матеріалу, стану речі, складності та обсягу робіт.</p>
+      </div>
+    </section>
+
+    <section class="section dark" id="about">
+      <div class="wrap about-layout">
+        <figure class="about-photo mask-reveal"><img src="assets/real-boots-recolor.webp" alt="Реальна робота ЯМайстер: черевики до та після зміни кольору" width="872" height="764" loading="lazy"></figure>
+        <div class="about-copy reveal">
+          <div><span class="section-label">Про майстерню</span><p class="kicker">Поділ, Київ</p><h2>Ремесло, де поспіх видно одразу</h2><p class="about-text">«ЯМайстер» працює з повсякденним і брендовим взуттям, сумками та іншими виробами зі шкіри. У відгуках клієнти найчастіше відзначають уважність до деталей, відновлення складних речей і результат, який повертає виробу охайний вигляд.</p></div>
+          <div class="facts">
+            <div class="fact"><strong>20+</strong><span>років досвіду, згаданих власником у відповіді на відгук</span></div>
+            <div class="fact"><strong>52</strong><span>відгуки на відкритій сторінці Top20</span></div>
+            <div class="fact"><strong>4,4</strong><span>поточна оцінка на Top20</span></div>
+            <div class="fact"><strong>6</strong><span>основних напрямів ремонту й реставрації</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section red" id="process">
+      <div class="wrap">
+        <div class="split-head reveal"><div><span class="section-label">Як відбувається ремонт</span><h2>Ви знаєте, що робимо, до початку роботи</h2></div><p class="lead">Послідовність без зайвого квесту: огляд, рішення, погодження й готовий результат.</p></div>
+        <div class="process">
+          <article class="process-step reveal"><h3>Показуєте річ</h3><p>Приносите виріб на Спаську, 9а або спочатку надсилаєте фото в Instagram.</p></article>
+          <article class="process-step reveal"><h3>Оцінюємо стан</h3><p>Майстер перевіряє матеріал, пошкодження та реалістичний результат відновлення.</p></article>
+          <article class="process-step reveal"><h3>Погоджуємо деталі</h3><p>Фіксуємо обсяг роботи, орієнтовний строк і вартість до початку ремонту.</p></article>
+          <article class="process-step reveal"><h3>Відновлюємо</h3><p>Виконуємо погоджені роботи та перевіряємо результат перед видачею.</p></article>
+          <article class="process-step reveal"><h3>Передаємо готове</h3><p>Ви оглядаєте річ і отримуєте короткі поради щодо подальшого догляду.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="approach">
+      <div class="wrap">
+        <div class="split-head reveal"><div><span class="section-label">Наш підхід</span><h2>Що важливо до того, як річ потрапить на стіл</h2></div><p class="lead">Не обіцяємо неможливого без огляду. Спочатку визначаємо, який результат реально отримати саме з вашим матеріалом.</p></div>
+        <div class="benefits">
+          <article class="benefit reveal"><span class="icon">01</span><h3>Оцінка до ремонту</h3><p>Майстер пояснює варіанти й ризики, перш ніж братися до роботи.</p></article>
+          <article class="benefit reveal"><span class="icon">02</span><h3>Рішення під матеріал</h3><p>Спосіб відновлення залежить від шкіри, конструкції й стану виробу.</p></article>
+          <article class="benefit reveal"><span class="icon">03</span><h3>Складні випадки</h3><p>У портфоліо є реставрація брендового взуття та сумок зі складною фактурою.</p></article>
+          <article class="benefit reveal"><span class="icon">04</span><h3>Погоджена вартість</h3><p>Фінальну суму визначаємо після огляду, а не за загальною картинкою.</p></article>
+          <article class="benefit reveal"><span class="icon">05</span><h3>Результат без маскування</h3><p>Мета — акуратне відновлення функції та зовнішнього вигляду речі.</p></article>
+          <article class="benefit reveal"><span class="icon">06</span><h3>Поради після роботи</h3><p>Підкажемо, як доглядати за матеріалом і довше зберегти результат.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section dark" id="reviews">
+      <div class="wrap reviews-layout">
+        <div class="score reveal"><span class="section-label">Відгуки клієнтів</span><div class="score-number">4,4</div><div class="score-stars" aria-label="4,4 із 5 зірок">★★★★★</div><p><a href="https://top20.ua/kyiv/dom-i-byit/remont-obuvi/yamayster-restavratsiya-i-farbuvannya-shkirvirobiv.html" target="_blank" rel="noopener noreferrer">52 відгуки на Top20 ↗</a></p></div>
+        <div class="review-list reveal">
+          <div class="review-toolbar"><p>Останні перевірені відгуки за 2025 рік. Гортайте стрілками, мишкою або свайпом.</p><div class="review-nav"><button class="review-arrow" type="button" data-review-prev aria-label="Попередні відгуки">←</button><button class="review-arrow" type="button" data-review-next aria-label="Наступні відгуки">→</button></div></div>
+          <div class="review-track" id="review-track" role="region" aria-label="Відгуки клієнтів" tabindex="0">
+            <article class="review"><span class="review-avatar" aria-hidden="true">П</span><div class="review-body"><p>«Зробили реставрацію ковбойських чобіт, велике спасибі, найкраще в місті!»</p><footer>Павло Тимошенко · березень 2025 · Top20</footer></div></article>
+            <article class="review"><span class="review-avatar" aria-hidden="true">С</span><div class="review-body"><p>«Швидко замінили карабін на моїй сумці. Гарна робота.»</p><footer>Софія · березень 2025 · Top20</footer></div></article>
+            <article class="review"><span class="review-avatar" aria-hidden="true">S</span><div class="review-body"><p>Майстерню відзначили за філігранну роботу зі складним ремонтом брендового взуття.</p><footer>Standoff22 · січень 2025 · Top20</footer></div></article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="faq">
+      <div class="wrap faq-layout">
+        <div class="reveal"><span class="section-label">Часті запитання</span><p class="kicker">Перед візитом</p><h2>Коротко про головне</h2></div>
+        <div class="faq-list reveal">
+          <details><summary>Чи можна оцінити ремонт за фотографією?</summary><p>Так, фото допоможе дати попередню оцінку. Точну вартість і можливий результат майстер підтвердить після огляду речі наживо.</p></details>
+          <details><summary>Скільки часу займає ремонт?</summary><p>Строк залежить від матеріалу, пошкодження й наявності потрібної фурнітури. Точний строк майстер назве після огляду виробу та перевірки наявності матеріалів.</p></details>
+          <details><summary>Чи працюєте з брендовими речами?</summary><p>У відкритому портфоліо та відгуках є приклади реставрації брендового взуття й сумок. Можливість ремонту конкретної речі визначається після огляду.</p></details>
+          <details><summary>Чому немає однієї фіксованої ціни?</summary><p>Однакова проблема може потребувати різних матеріалів і обсягу роботи. Тому прайс дає орієнтир, а остаточна сума залежить від стану виробу.</p></details>
+          <details><summary>Де знаходиться майстерня?</summary><p>Київ, Поділ, вулиця Спаська, 9а. Поруч із Контрактовою площею.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="section red" id="photo-estimate">
+      <div class="wrap photo-form-layout">
+        <div class="reveal"><span class="section-label">Оцінка за фотографією</span><p class="kicker">Покажіть пошкодження</p><h2>Підготуйте звернення для Instagram</h2><p class="lead">Сайт допомагає переглянути фото й скопіювати опис проблеми. Після цього відкриється Instagram майстерні — фото та текст потрібно надіслати в Direct вручну.</p></div>
+        <form class="upload-box reveal" id="photo-form">
+          <label class="upload-zone" id="upload-zone"><input type="file" id="photo-input" accept="image/*"><img class="preview" id="preview" alt="Попередній перегляд вибраного фото"><span class="upload-title" id="upload-title">Перетягніть фото сюди або натисніть</span><span class="upload-note">JPG, PNG або фото з телефона</span></label>
+          <textarea class="damage-input" id="damage-text" placeholder="Коротко опишіть проблему: відклеїлася підошва, стерся колір, зламався карабін…"></textarea>
+          <p class="upload-disclaimer"><span aria-hidden="true">ⓘ</span><span><strong>Фото не надсилається автоматично.</strong> Воно залишається на вашому пристрої, доки ви самі не прикріпите його в Direct.</span></p>
+          <div class="upload-actions"><button class="btn btn-paper btn-arrow" type="submit">Скопіювати опис і відкрити Instagram</button><button class="btn" type="button" id="clear-photo">Очистити</button></div>
+        </form>
+      </div>
+    </section>
+
+    <section class="section" id="contacts">
+      <div class="wrap contact-grid">
+        <div class="contact-panel reveal">
+          <div><span class="section-label">Контакти</span><p class="kicker">Майстерня на Подолі</p><h2>Принесіть річ на огляд</h2></div>
+          <div class="contact-lines">
+            <div class="contact-line"><span>Телефон</span><a class="call-link" data-call href="tel:+380673459480">+38 067 345 94 80</a></div>
+            <div class="contact-line"><span>Адреса</span><a href="https://www.google.com/maps/dir/?api=1&destination=%D0%A1%D0%BF%D0%B0%D1%81%D1%8C%D0%BA%D0%B0+9%D0%B0%2C+%D0%9A%D0%B8%D1%97%D0%B2" target="_blank" rel="noopener noreferrer">Київ, вул. Спаська, 9а ↗</a></div>
+            <div class="contact-line"><span>Графік</span><p>Пн–Пт 09:00–18:00<br>Сб 10:00–18:00<br>Нд — зачинено</p></div>
+            <div class="contact-line"><span>Instagram</span><a href="https://www.instagram.com/ya_master_kiev/" target="_blank" rel="noopener noreferrer">@ya_master_kiev ↗</a></div>
+          </div>
+          <div class="hero-actions"><a class="btn btn-signal call-link" data-call href="tel:+380673459480">Зателефонувати</a><a class="btn btn-paper" href="https://www.instagram.com/ya_master_kiev/" target="_blank" rel="noopener noreferrer">Написати в Instagram</a></div>
+        </div>
+        <div class="map reveal"><iframe title="ЯМайстер на карті Києва" src="https://www.google.com/maps?q=%D0%B2%D1%83%D0%BB%D0%B8%D1%86%D1%8F%20%D0%A1%D0%BF%D0%B0%D1%81%D1%8C%D0%BA%D0%B0%2C%209%D0%B0%2C%20%D0%9A%D0%B8%D1%97%D0%B2&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer"><div class="wrap footer-inner"><span>© <span id="year"></span> ЯМайстер</span><span>Ремонт і реставрація взуття та шкіряних виробів · Київ</span><span>Інформація з відкритих бізнес-сторінок</span></div></footer>
+  <div class="mobile-dock"><a class="btn btn-signal call-link" data-call href="tel:+380673459480">Подзвонити</a><a class="btn" href="#photo-estimate">Фото-оцінка</a></div>
+
+  <script>
+    const INSTAGRAM = 'https://www.instagram.com/ya_master_kiev/';
+    const toast = document.querySelector('.toast');
+    let toastTimer;
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+    }
+
+    window.addEventListener('load', () => setTimeout(() => document.querySelector('.page-intro').classList.add('done'), 420));
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const menuButton = document.querySelector('.menu-button');
+    const menu = document.querySelector('.nav-links');
+    menuButton.addEventListener('click', () => {
+      const open = menu.classList.toggle('open');
+      document.body.classList.toggle('menu-open', open);
+      menuButton.setAttribute('aria-expanded', String(open));
+      menuButton.textContent = open ? 'Закрити' : 'Меню';
+    });
+    menu.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
+      menu.classList.remove('open');
+      document.body.classList.remove('menu-open');
+      menuButton.setAttribute('aria-expanded','false');
+      menuButton.textContent = 'Меню';
+    }));
+
+    const reviewTrack = document.getElementById('review-track');
+    const reviewPrev = document.querySelector('[data-review-prev]');
+    const reviewNext = document.querySelector('[data-review-next]');
+    function reviewStep() {
+      const card = reviewTrack.querySelector('.review');
+      return card ? card.getBoundingClientRect().width + 18 : reviewTrack.clientWidth;
+    }
+    function updateReviewNav() {
+      const atStart = reviewTrack.scrollLeft <= 3;
+      const atEnd = reviewTrack.scrollLeft + reviewTrack.clientWidth >= reviewTrack.scrollWidth - 3;
+      reviewPrev.disabled = atStart;
+      reviewNext.disabled = atEnd;
+    }
+    reviewPrev.addEventListener('click', () => reviewTrack.scrollBy({ left: -reviewStep(), behavior: 'smooth' }));
+    reviewNext.addEventListener('click', () => reviewTrack.scrollBy({ left: reviewStep(), behavior: 'smooth' }));
+    reviewTrack.addEventListener('keydown', event => {
+      if (event.key === 'ArrowLeft') { event.preventDefault(); reviewPrev.click(); }
+      if (event.key === 'ArrowRight') { event.preventDefault(); reviewNext.click(); }
+    });
+    let reviewDragging = false;
+    let reviewStartX = 0;
+    let reviewStartScroll = 0;
+    reviewTrack.addEventListener('pointerdown', event => {
+      if (event.pointerType !== 'mouse') return;
+      reviewDragging = true;
+      reviewStartX = event.clientX;
+      reviewStartScroll = reviewTrack.scrollLeft;
+      reviewTrack.classList.add('dragging');
+      reviewTrack.setPointerCapture(event.pointerId);
+    });
+    reviewTrack.addEventListener('pointermove', event => {
+      if (!reviewDragging) return;
+      reviewTrack.scrollLeft = reviewStartScroll - (event.clientX - reviewStartX);
+    });
+    function stopReviewDrag() {
+      reviewDragging = false;
+      reviewTrack.classList.remove('dragging');
+    }
+    reviewTrack.addEventListener('pointerup', stopReviewDrag);
+    reviewTrack.addEventListener('pointercancel', stopReviewDrag);
+    reviewTrack.addEventListener('scroll', updateReviewNav, { passive: true });
+    window.addEventListener('resize', updateReviewNav);
+    updateReviewNav();
+
+    const reviewMotion = new IntersectionObserver(entries => entries.forEach(entry => {
+      entry.target.classList.toggle('is-visible', entry.isIntersecting);
+    }), { root: reviewTrack, threshold: .58 });
+    reviewTrack.querySelectorAll('.review').forEach(card => reviewMotion.observe(card));
+
+    const revealObserver = new IntersectionObserver(entries => entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('in'); revealObserver.unobserve(entry.target); }
+    }), { threshold: .11 });
+    document.querySelectorAll('.reveal,.mask-reveal').forEach(el => revealObserver.observe(el));
+
+    const sections = [...document.querySelectorAll('main section[id]')];
+    const navLinks = [...document.querySelectorAll('.nav-links a')];
+    const sectionObserver = new IntersectionObserver(entries => entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      navLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id));
+    }), { rootMargin: '-40% 0px -52% 0px' });
+    sections.forEach(section => sectionObserver.observe(section));
+
+    window.addEventListener('scroll', () => {
+      const max = document.documentElement.scrollHeight - innerHeight;
+      document.querySelector('.progress').style.width = (scrollY / max * 100) + '%';
+    }, { passive: true });
+
+    const priceMatrix = {
+      shoes: { color: 'від 650 грн', sole: 'від 550 грн', zip: 'від 700 грн', hardware: 'від 450 грн' },
+      bag: { color: 'від 1 200 грн', sole: 'після огляду', zip: 'від 750 грн', hardware: 'від 450 грн' },
+      clothes: { color: 'від 1 500 грн', sole: 'після огляду', zip: 'від 900 грн', hardware: 'від 550 грн' }
+    };
+    let item = 'shoes', work = 'color';
+    document.querySelectorAll('.chips').forEach(group => group.addEventListener('click', event => {
+      const button = event.target.closest('.chip');
+      if (!button) return;
+      group.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
+      button.classList.add('active');
+      if (group.dataset.group === 'item') item = button.dataset.value;
+      if (group.dataset.group === 'work') work = button.dataset.value;
+      const result = document.getElementById('estimate-price');
+      result.animate([{opacity:.2,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:260});
+      result.textContent = priceMatrix[item][work];
+    }));
+
+    const zone = document.getElementById('upload-zone');
+    const input = document.getElementById('photo-input');
+    const preview = document.getElementById('preview');
+    const uploadTitle = document.getElementById('upload-title');
+    function loadPhoto(file) {
+      if (!file || !file.type.startsWith('image/')) { showToast('Оберіть файл зображення'); return; }
+      const reader = new FileReader();
+      reader.onload = event => { preview.src = event.target.result; preview.classList.add('visible'); uploadTitle.textContent = file.name; };
+      reader.readAsDataURL(file);
+    }
+    input.addEventListener('change', () => loadPhoto(input.files[0]));
+    ['dragenter','dragover'].forEach(type => zone.addEventListener(type, event => { event.preventDefault(); zone.classList.add('dragging'); }));
+    ['dragleave','drop'].forEach(type => zone.addEventListener(type, event => { event.preventDefault(); zone.classList.remove('dragging'); }));
+    zone.addEventListener('drop', event => loadPhoto(event.dataTransfer.files[0]));
+    document.getElementById('clear-photo').addEventListener('click', () => { input.value=''; preview.removeAttribute('src'); preview.classList.remove('visible'); uploadTitle.textContent='Перетягніть фото сюди або натисніть'; document.getElementById('damage-text').value=''; });
+    document.getElementById('photo-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const text = document.getElementById('damage-text').value.trim() || 'Хочу уточнити можливість і вартість ремонту. Фото додам у повідомленні.';
+      try { await navigator.clipboard.writeText(text); showToast('Опис скопійовано. В Instagram додайте фото вручну.'); }
+      catch { showToast('Відкриваємо Instagram. Додайте фото й опис вручну.'); }
+      setTimeout(() => window.open(INSTAGRAM, '_blank', 'noopener'), 700);
+    });
+
+    if (matchMedia('(pointer:fine)').matches) {
+      document.querySelectorAll('.work').forEach(card => card.addEventListener('pointermove', event => {
+        const rect = card.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width - .5;
+        const y = (event.clientY - rect.top) / rect.height - .5;
+        card.style.transform = `perspective(700px) rotateX(${-y*3}deg) rotateY(${x*4}deg)`;
+      }));
+      document.querySelectorAll('.work').forEach(card => card.addEventListener('pointerleave', () => card.style.transform = ''));
+    }
+  </script>
+</body>
+</html>
